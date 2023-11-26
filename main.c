@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "smallchesslib.h"
+#include "chess_types.h"
 
 #define MY_BOARD_START_STATE "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
