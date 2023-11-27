@@ -22,6 +22,7 @@ typedef struct {
 
 // Function declarations
 void parseSANToChessgame(const char* san, chessgame* game);
+void appendCharToSANString(char c, char **sanOutput) 
 void chessgameToSAN(const chessgame* game, char* sanOutput);
 void parseFENToChessboard(const char* fen, chessboard* board);
 void chessboardToFEN(const chessboard* board, char* fenOutput);
