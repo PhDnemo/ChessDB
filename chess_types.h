@@ -5,18 +5,20 @@
 
 #include "smallchesslib.h"
 
-// Define the chessgame data type
+#define FEN_MAX_LENGTH 100
+#define SAN_MAX_LENGTH 2000
+
 typedef struct {
-    SCL_Board board;   // Current state of the chessboard
-    SCL_Record record; // Record of the moves made in the game
-    // Add more fields if necessary
+    char fen[FEN_MAX_LENGTH]; // FEN representation of the chessboard
+    // Additional fields can be added as required
+} chessboard;
+
+typedef struct {
+    char san[SAN_MAX_LENGTH]; // SAN representation of the chess game
+    chessboard currentBoard;   // Current state of the chessboard
+    // Additional fields can be added as required
 } chessgame;
 
-// Define the chessboard data type
-typedef struct {
-    SCL_Board board; // Current state of the chessboard
-    // Add more fields if necessary
-} chessboard;
 
 // Function declarations
 void parseSANToChessgame(const char* san, chessgame* game);
