@@ -27,12 +27,7 @@ typedef uint8_t (*SCL_RandomFunction)(void);
 
 /*******************************************************************
  * Input and Output functions  
- * For SAN   
- * 
- * 问题：
- * 1. PGN_OUTPUT_SIZE 没有宏定义；我看.h中没有对pgn的size定义
- * 2. chessgame *game = palloc(sizeof(chessgame)); 中第二个chessgame是不是要改成scl_game
- * 3. 这里面chessgame都要改成scl_game吧？
+ * For SAN
 **************************************************************/
 
 PG_FUNCTION_INFO_V1(san_to_chessgame); // Input
@@ -87,12 +82,8 @@ Datum chessgame_to_san(PG_FUNCTION_ARGS) {
 }
 
 /*******************************************************************
- * 11/30 13:30新增
  * Rec and Send functions  
  * For SAN
- * 
- * 问题：
- * 1. 和前面一样的问题，chessgame是不是都要改成SCL_game    //已改
 **************************************************************/
 
 PG_FUNCTION_INFO_V1(receive_chessgame);
