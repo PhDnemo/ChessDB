@@ -6,7 +6,7 @@ This is the DBSA project.
 
 - **Min Zhang** - *1* - [Min](https://github.com/PhDnemo)
 - **Yutao Cheng** - *2* - [Yutao](https://github.com/A-hungry-wolf)
-- **Ziyong Zhang** - *3* - [Ziyong](https://github.com)
+- **Ziyong Zhang** - *3* - [Ziyong](https://github.com/Ziyong-Zhang)
 - **Jintao Ma** - *4* - [Jintao](https://github.com/woshimajintao)
 
 ## System Requirements
