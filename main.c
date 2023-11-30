@@ -25,9 +25,16 @@ PG_MODULE_MAGIC;
 
 typedef uint8_t (*SCL_RandomFunction)(void);
 
-/*
-    Input and Output functions    
-*/
+/*******************************************************************
+ * Input and Output functions  
+ * For SAN   
+ * 
+ * 问题：
+ * 1. PGN_OUTPUT_SIZE 没有宏定义；我看.h中没有对pgn的size定义
+ * 2. chessgame *game = palloc(sizeof(chessgame)); 中第二个chessgame是不是要改成scl_game
+ * 3. 这里面chessgame都要改成scl_game吧？
+**************************************************************/
+
 PG_FUNCTION_INFO_V1(san_to_chessgame); // Input
 Datum san_to_chessgame(PG_FUNCTION_ARGS) {
     // Retrieve the input SAN string
@@ -78,6 +85,52 @@ Datum chessgame_to_san(PG_FUNCTION_ARGS) {
     PG_RETURN_TEXT_P(output_text);
 }
 
+/*******************************************************************
+ * 11/30 13:30新增
+ * Rec and Send functions  
+ * For SAN
+ * 
+ * 问题：
+ * 1. 和前面一样的问题，chessgame是不是都要改成SCL_game
+**************************************************************/
+
+PG_FUNCTION_INFO_V1(receive_chessgame);
+Datum receive_chessgame(PG_FUNCTION_ARGS) {
+    StringInfo buf = (StringInfo) PG_GETARG_POINTER(0);
+    chessgame *game;
+
+    game = (chessgame *) palloc(sizeof(chessgame));
+
+    game->record = palloc(sizeof(SCL_Game));  // Assuming SCL_Board is the correct type
+    game->currentBoard = *game->record;        // Initialize currentBoard, if necessary
+
+    // Read the binary data from the input buffer
+    pq_copymsgbytes(buf, (char *) game->record, sizeof(SCL_Game));
+
+    PG_RETURN_POINTER(game);
+}
+
+PG_FUNCTION_INFO_V1(send_chessgame);
+Datum send_chessgame(PG_FUNCTION_ARGS) {
+    chessgame *game = (chessgame *) PG_GETARG_POINTER(0);
+    StringInfoData buf;
+
+    // Initialize a StringInfoData structure for the output buffer
+    pq_begintypsend(&buf);
+
+    // Write the binary data to the output buffer
+    pq_sendbytes(&buf, (const char *) game->record, sizeof(SCL_Game));
+
+    // Finalize the output buffer and return it
+    PG_RETURN_BYTEA_P(pq_endtypsend(&buf));
+}
+
+/************************************ 
+ * Input Output Functions
+ * For FEN -- Chessboard
+ * 
+ * **************************************************/
+
 PG_FUNCTION_INFO_V1(fen_to_chessboard);
 Datum fen_to_chessboard(PG_FUNCTION_ARGS) {
     // Retrieve the input FEN string
@@ -120,6 +173,47 @@ Datum chessboard_to_fen(PG_FUNCTION_ARGS) {
 
     PG_RETURN_TEXT_P(output_text);
 }
+
+/*******************************************************************
+ * 11/30 13:30新增
+ * Rec and Send functions  
+ * For fen
+ * 
+ * 问题：
+ * 1. 和前面一样的问题，chessboard是不是都要改成SCL_board
+**************************************************************/
+
+PG_FUNCTION_INFO_V1(receive_chessboard);
+Datum receive_chessboard(PG_FUNCTION_ARGS) {
+    StringInfo buf = (StringInfo) PG_GETARG_POINTER(0);
+    chessboard *board;
+
+    board = (chessboard *) palloc(sizeof(chessboard));
+
+    board->board = palloc(sizeof(SCL_Board));  // Assuming SCL_Board is the correct type
+
+    // Read the binary data from the input buffer
+    pq_copymsgbytes(buf, (char *) board->board, sizeof(SCL_Board));
+
+    PG_RETURN_POINTER(board);
+}
+
+PG_FUNCTION_INFO_V1(send_chessboard);
+Datum send_chessboard(PG_FUNCTION_ARGS) {
+    chessboard *board = (chessboard *) PG_GETARG_POINTER(0);
+    StringInfoData buf;
+
+    // Initialize a StringInfoData structure for the output buffer
+    pq_begintypsend(&buf);
+
+    // Write the binary data to the output buffer
+    pq_sendbytes(&buf, (const char *) board->board, sizeof(SCL_Board));
+
+    // Finalize the output buffer and return it
+    PG_RETURN_BYTEA_P(pq_endtypsend(&buf));
+}
+
+/************************************ **************************************************/
 
 
 uint8_t myRandomFunction() {
