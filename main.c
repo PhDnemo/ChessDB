@@ -41,7 +41,7 @@ Datum san_to_chessgame(PG_FUNCTION_ARGS) {
     char *san_str = PG_GETARG_CSTRING(0);
 
     // Create a new instance of chessgame structure
-    chessgame *game = palloc(sizeof(chessgame));
+    SCL_Game *game = palloc(sizeof(chessgame));
 
     // Initialize the chessgame structure
     memset(game, 0, sizeof(chessgame));
@@ -58,10 +58,10 @@ Datum san_to_chessgame(PG_FUNCTION_ARGS) {
 PG_FUNCTION_INFO_V1(chessgame_to_san);
 Datum chessgame_to_san(PG_FUNCTION_ARGS) {
     // Retrieve the input chessgame object
-    chessgame *game = (chessgame *) PG_GETARG_POINTER(0);
+    SCL_Game *game = (chessgame *) PG_GETARG_POINTER(0);
 
     // Create a buffer to store the output PGN string
-    char *pgnOutput = (char *) palloc(PGN_OUTPUT_SIZE); // Define PGN_OUTPUT_SIZE to a suitable size
+    char *pgnOutput = (char *) palloc(SAN_OUTPUT_SIZE); // Define PGN_OUTPUT_SIZE to a suitable size
     char *outputPointer = pgnOutput; // Pointer to the current position of the PGN string
 
     // Define a helper function to append characters to the PGN string
@@ -91,13 +91,13 @@ Datum chessgame_to_san(PG_FUNCTION_ARGS) {
  * For SAN
  * 
  * 问题：
- * 1. 和前面一样的问题，chessgame是不是都要改成SCL_game
+ * 1. 和前面一样的问题，chessgame是不是都要改成SCL_game    //已改
 **************************************************************/
 
 PG_FUNCTION_INFO_V1(receive_chessgame);
 Datum receive_chessgame(PG_FUNCTION_ARGS) {
     StringInfo buf = (StringInfo) PG_GETARG_POINTER(0);
-    chessgame *game;
+    SCL_Game *game;
 
     game = (chessgame *) palloc(sizeof(chessgame));
 
@@ -112,7 +112,7 @@ Datum receive_chessgame(PG_FUNCTION_ARGS) {
 
 PG_FUNCTION_INFO_V1(send_chessgame);
 Datum send_chessgame(PG_FUNCTION_ARGS) {
-    chessgame *game = (chessgame *) PG_GETARG_POINTER(0);
+    SCL_Game *game = (chessgame *) PG_GETARG_POINTER(0);
     StringInfoData buf;
 
     // Initialize a StringInfoData structure for the output buffer
@@ -137,7 +137,7 @@ Datum fen_to_chessboard(PG_FUNCTION_ARGS) {
     char *fenStr = text_to_cstring(PG_GETARG_TEXT_P(0));
 
     // Create a new instance of the chessboard structure
-    chessboard *board = palloc(sizeof(chessboard));
+    SCL_Board *board = palloc(sizeof(chessboard));
 
     // Load the board state from the FEN string using SCL_boardFromFEN function
     if (!SCL_boardFromFEN(board->board, fenStr)) {
@@ -153,7 +153,7 @@ Datum fen_to_chessboard(PG_FUNCTION_ARGS) {
 PG_FUNCTION_INFO_V1(chessboard_to_fen);
 Datum chessboard_to_fen(PG_FUNCTION_ARGS) {
     // Retrieve the input chessboard object
-    chessboard *board = (chessboard *) PG_GETARG_POINTER(0);
+    SCL_Board *board = (chessboard *) PG_GETARG_POINTER(0);
 
     // Allocate sufficient memory for the FEN string
     char *fenOutput = (char *) palloc(SCL_FEN_MAX_LENGTH);
@@ -180,13 +180,13 @@ Datum chessboard_to_fen(PG_FUNCTION_ARGS) {
  * For fen
  * 
  * 问题：
- * 1. 和前面一样的问题，chessboard是不是都要改成SCL_board
+ * 1. 和前面一样的问题，chessboard是不是都要改成SCL_board     //已改
 **************************************************************/
 
 PG_FUNCTION_INFO_V1(receive_chessboard);
 Datum receive_chessboard(PG_FUNCTION_ARGS) {
     StringInfo buf = (StringInfo) PG_GETARG_POINTER(0);
-    chessboard *board;
+    SCL_Board *board;
 
     board = (chessboard *) palloc(sizeof(chessboard));
 
@@ -200,7 +200,7 @@ Datum receive_chessboard(PG_FUNCTION_ARGS) {
 
 PG_FUNCTION_INFO_V1(send_chessboard);
 Datum send_chessboard(PG_FUNCTION_ARGS) {
-    chessboard *board = (chessboard *) PG_GETARG_POINTER(0);
+    SCL_Board *board = (chessboard *) PG_GETARG_POINTER(0);
     StringInfoData buf;
 
     // Initialize a StringInfoData structure for the output buffer
