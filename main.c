@@ -41,24 +41,24 @@ Datum san_to_chessgame(PG_FUNCTION_ARGS) {
     char *san_str = PG_GETARG_CSTRING(0);
 
     // Create a new instance of chessgame structure
-    SCL_Game *game = palloc(sizeof(chessgame));
+    SCL_Game *game = palloc(sizeof(SCL_Game));
 
     // Initialize the chessgame structure
-    memset(game, 0, sizeof(chessgame));
+    memset(game, 0, sizeof(SCL_Game));
 
     // Convert the SAN string to PGN format and store it in game->record
     // Note: Ensure that the conversion from SAN to PGN is feasible
     // If SAN and PGN formats are incompatible, additional conversion logic might be required here
     SCL_recordFromPGN(game->record, san_str);
 
-    // Return the result as your custom type chessgame
+    // Return the result as your custom type SCL_Game
     PG_RETURN_POINTER(game);
 }
 
 PG_FUNCTION_INFO_V1(chessgame_to_san);
 Datum chessgame_to_san(PG_FUNCTION_ARGS) {
     // Retrieve the input chessgame object
-    SCL_Game *game = (chessgame *) PG_GETARG_POINTER(0);
+    SCL_Game *game = (SCL_Game *) PG_GETARG_POINTER(0);
 
     // Create a buffer to store the output PGN string
     char *pgnOutput = (char *) palloc(SAN_OUTPUT_SIZE); // Define PGN_OUTPUT_SIZE to a suitable size
