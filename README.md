@@ -24,9 +24,32 @@ This project requires the following system environment:
 ## Usage
 To run the extension, follow these steps:
 
+(1) Run the below in the terminal:
 
 ```bash
+PATH=/usr/local/pgsql/bin:$PATH
+cd “path_to_mychess”/complex/
+make clean
+make
+sudo make install
+
+psql -p <2345> chess_test
+
 ```
+(2) 
+``` sql
+DROP EXTENSION IF EXISTS my_chess CASCADE;
+
+CREATE EXTENSION my_chess;
+
+CREATE TABLE t(id int, board chessboard);
+
+insert into t VALUES (2, 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1');
+
+SELECT * FROM t;
+
+```
+
 
 
 ## Contributing
