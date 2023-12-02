@@ -12,6 +12,7 @@
 --     AS 'MODULE_PATHNAME'
 --     LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 CREATE TYPE chessboard;
+CREATE TYPE chessgame;
 CREATE OR REPLACE FUNCTION SCL_board_in(cstring)
     RETURNS chessboard
     AS 'MODULE_PATHNAME','SCL_board_in'
@@ -22,9 +23,25 @@ CREATE OR REPLACE FUNCTION SCL_board_out(chessboard)
     AS 'MODULE_PATHNAME','SCL_board_out'
     LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
--- Create type
+CREATE OR REPLACE FUNCTION san_in(cstring)
+    RETURNS chessgame
+    AS 'MODULE_PATHNAME','san_in'
+    LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE OR REPLACE FUNCTION san_out(chessgame)
+    RETURNS cstring
+    AS 'MODULE_PATHNAME','san_out'
+    LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+-- Create chessboard datatype
 CREATE TYPE chessboard (
   internallength = 1024,
   input          = SCL_board_in,
   output         = SCL_board_out
+);
+-- Create chessgame datatype
+CREATE TYPE chessgame (
+  internallength = 1024,
+  input          = san_in,
+  output         = san_out
 );
