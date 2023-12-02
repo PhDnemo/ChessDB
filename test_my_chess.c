@@ -20,6 +20,11 @@ PG_MODULE_MAGIC;
 #define MY_BOARD_START_STATE "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 #define SAN_OUTPUT_SIZE 1024
 #define FEN_OUTPUT_SIZE 1024
+
+static void  putCharacter(char c)
+{
+  putchar(c);
+}
 // #define SCL_FEN_MAX_LENGTH 1024
 
 /*******************************************************************
@@ -55,15 +60,32 @@ Datum SCL_board_out(PG_FUNCTION_ARGS) {
     // Convert the board state to a FEN string using the SCL_boardToFEN function
     if (!SCL_boardToFEN(*board, fen_str)) {
         // If conversion fails, throw an error
-        elog(ERROR, "failed to convert SCL_Board to FEN");
+        ereport(ERROR,
+                (errcode(ERRCODE_INTERNAL_ERROR),
+                 errmsg("failed to convert SCL_Board to FEN")));
     }
-
-    // Print some debugging information
-    elog(NOTICE, "FEN string: %s", fen_str);
-
-    // Convert the FEN string to PostgreSQL's text data type
-    // text *output_text = cstring_to_text(fen_str);
-
-    // Return the text
     PG_RETURN_TEXT_P(fen_str);
+}
+
+/*******************************************************************
+ * Input and Output functions
+ * For SAN -- Chessgame
+**************************************************************/
+
+PG_FUNCTION_INFO_V1(san_in); // Input
+Datum san_in(PG_FUNCTION_ARGS) {
+    // Retrieve the input SAN string
+    char *san_str = PG_GETARG_CSTRING(0);
+    text *record = cstring_to_text(san_str);
+    PG_RETURN_TEXT_P(record); // Return the text data type
+}
+
+PG_FUNCTION_INFO_V1(san_out);
+Datum san_out(PG_FUNCTION_ARGS) {
+
+  // Retrieve the input SCL_Record object
+  SCL_Record *record = (SCL_Record *) PG_GETARG_POINTER(0);
+  char *san_str = text_to_cstring(record); // Convert text to C string
+  PG_RETURN_CSTRING(san_str);
+
 }
