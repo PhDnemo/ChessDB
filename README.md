@@ -48,6 +48,11 @@ insert into t VALUES (2, 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e
 
 SELECT * FROM t;
 
+CREATE TABLE t1(id int, game chessgame);
+
+insert into t1 VALUES (1, '1. Nf3 Nf6 2. c4 g6 3. Nc3 Bg7');
+
+select * from t1;
 ```
 
 
