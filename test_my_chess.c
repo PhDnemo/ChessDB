@@ -89,3 +89,43 @@ Datum san_out(PG_FUNCTION_ARGS) {
   PG_RETURN_CSTRING(san_str);
 
 }
+//Function to return the board state at a given half-move
+
+PG_FUNCTION_INFO_V1(getBoard);
+Datum getBoard(PG_FUNCTION_ARGS) {
+
+    //SCL_Record *record = (SCL_Record *) PG_GETARG_POINTER(0);
+    char* fenstr = (char*)malloc(70 * sizeof(char));//allocation of size 70 char(FEN notation does not exceed 70 character)
+    strcpy(fenstr,"");
+    text *san_text = PG_GETARG_TEXT_P(0);
+    char *san_str = text_to_cstring(san_text);
+
+    uint16_t halfMoveCount = PG_GETARG_UINT16(1);
+
+    SCL_Record record;
+    SCL_recordFromPGN(record,san_str);
+    SCL_Board* board = (SCL_Board*)malloc(sizeof(SCL_Board));
+    SCL_boardInit(board);
+    uint16_t recordLength = SCL_recordLength(record);
+    //SCL_recordFromPGN(record,halfMoveCount);
+
+    //char *recordString1 = text_to_cstring(record);
+
+    //elog(NOTICE, "recordFromPGN: %s", recordString1);
+
+    SCL_recordApply(record, board, halfMoveCount);
+
+
+    int t = SCL_boardToFEN(board, fenstr);//Get the FEN notation as a string of the board state and returns the size of the string
+
+
+    //elog(NOTICE, "Fullrecord: %s", record);
+    //elog(NOTICE, "Fullrecord: %*H", SAN_OUTPUT_SIZE, record);
+    //打印有问题，待看
+    //elog(NOTICE, "Fullrecord: %.*s", (int)SAN_OUTPUT_SIZE, record);
+
+    //elog(NOTICE, "halfMoveCount: %u", halfMoveCount);
+    //elog(NOTICE, "recordLength: %u", recordLength);
+
+    return fenstr;
+}
