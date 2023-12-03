@@ -157,43 +157,105 @@ Datum chessgame_ge(PG_FUNCTION_ARGS) {
     PG_RETURN_BOOL(result >= 0);
 }
 
-//Function to return the board state at a given half-move
+// getBoard_internal
+char* getBoard_internal(char* san, int halfMoves){
 
-PG_FUNCTION_INFO_V1(getBoard);
-Datum getBoard(PG_FUNCTION_ARGS) {
-
-    //SCL_Record *record = (SCL_Record *) PG_GETARG_POINTER(0);
-    char* fenstr = (char*)malloc(70 * sizeof(char));//allocation of size 70 char(FEN notation does not exceed 70 character)
-    strcpy(fenstr,"");
-    text *san_text = PG_GETARG_TEXT_P(0);
-    char *san_str = text_to_cstring(san_text);
-
-    uint16_t halfMoveCount = PG_GETARG_UINT16(1);
-
+    char *san_str = text_to_cstring(san);
     SCL_Record record;
     SCL_recordFromPGN(record,san_str);
     SCL_Board* board = (SCL_Board*)malloc(sizeof(SCL_Board));
     SCL_boardInit(board);
     uint16_t recordLength = SCL_recordLength(record);
-    //SCL_recordFromPGN(record,halfMoveCount);
 
-    //char *recordString1 = text_to_cstring(record);
+    SCL_recordApply(record, board, halfMoves);
 
-    //elog(NOTICE, "recordFromPGN: %s", recordString1);
-
-    SCL_recordApply(record, board, halfMoveCount);
-
-
-    int t = SCL_boardToFEN(board, fenstr);//Get the FEN notation as a string of the board state and returns the size of the string
-
-
-    //elog(NOTICE, "Fullrecord: %s", record);
-    //elog(NOTICE, "Fullrecord: %*H", SAN_OUTPUT_SIZE, record);
-    //打印有问题，待看
-    //elog(NOTICE, "Fullrecord: %.*s", (int)SAN_OUTPUT_SIZE, record);
-
-    //elog(NOTICE, "halfMoveCount: %u", halfMoveCount);
-    //elog(NOTICE, "recordLength: %u", recordLength);
+    char* fenstr = (char*)malloc(70 * sizeof(char));//allocation of size 70 char(FEN notation does not exceed 70 character)
+    strcpy(fenstr,"");
+    SCL_boardToFEN(board, fenstr);//Get the FEN notation as a string of the board state and returns the size of the string
 
     return fenstr;
+}
+//Function to return the board state at a given half-move
+PG_FUNCTION_INFO_V1(getBoard);
+Datum getBoard(PG_FUNCTION_ARGS) {
+
+    text *san_text = PG_GETARG_TEXT_P(0);
+    uint16_t halfMoveCount = PG_GETARG_UINT16(1);
+
+    char* result = getBoard_internal(san_text,halfMoveCount);
+
+    PG_FREE_IF_COPY(san_text, 0);
+    PG_FREE_IF_COPY(halfMoveCount, 1);
+
+    return result;
+}
+//hasOpening_internal
+bool hasOpening_internal(char* san1, char* san2){
+
+    char *san_str1 = text_to_cstring(san1);
+    char *san_str2 = text_to_cstring(san2);
+    SCL_Record chessgame1,chessgame2;
+    SCL_recordFromPGN(chessgame1,san_str1);
+    SCL_recordFromPGN(chessgame2,san_str2);
+
+    SCL_Record tempGame;
+    memcpy(&tempGame, chessgame2, sizeof(SCL_Record));
+
+    uint16_t halfMoves1 = SCL_recordLength(chessgame1);
+    uint16_t halfMoves2 = SCL_recordLength(chessgame2);
+
+    if (halfMoves1 > halfMoves2) {
+        return false;
+    }
+    // recordRemove,util tempGame equalts to halfMoves1
+    while (SCL_recordLength(tempGame)> halfMoves1) {
+      SCL_recordRemoveLast(tempGame);
+    }
+
+    return memcpy(&tempGame, &chessgame1, sizeof(SCL_Record));
+}
+//Returns true if the first chess game starts with the exact same set of moves as the second chess game.
+PG_FUNCTION_INFO_V1(hasOpening);
+Datum
+hasOpening(PG_FUNCTION_ARGS) {
+  SCL_Record *record1 = (SCL_Record *) PG_GETARG_POINTER(0);
+  SCL_Record *record2 = (SCL_Record *) PG_GETARG_POINTER(1);
+  bool result = hasOpening_internal(record1,record2);
+  PG_FREE_IF_COPY(record1, 0);
+  PG_FREE_IF_COPY(record2, 1);
+  PG_RETURN_BOOL(result);
+}
+
+bool hasBoard_internal(char* san, SCL_Board* targetBoard, int moveCount) {
+    char* result = NULL;
+    char* fenstr = (char*)malloc(70 * sizeof(char));//allocation of size 70 char(FEN notation does not exceed 70 character)
+    strcpy(fenstr,"");
+
+    // Iterate through the first N half-moves
+    for (int i = 0; i < moveCount; ++i) {
+
+        result = getBoard_internal(san, i);
+
+        SCL_boardToFEN(targetBoard, fenstr);
+
+        // Check if the current board matches the target board
+        if (strcmp(result, fenstr) == 0) {
+            return true;  // Found a match
+        }
+    }
+
+    return false;  // Board not found in the first N half-moves
+}
+//Returns true if the chessgame contains the given board state in its first N half-moves.
+PG_FUNCTION_INFO_V1(hasBoard);
+Datum
+hasBoard(PG_FUNCTION_ARGS) {
+  char* san  = PG_GETARG_POINTER(0);
+  char* targetBoard = PG_GETARG_POINTER(1);
+  int moveCount = PG_GETARG_UINT16(2);
+  bool result = hasBoard_internal(san,targetBoard,moveCount);
+  PG_FREE_IF_COPY(san, 0);
+  PG_FREE_IF_COPY(targetBoard, 1);
+  PG_FREE_IF_COPY(moveCount, 2);
+  PG_RETURN_BOOL(result);
 }
