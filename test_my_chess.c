@@ -259,3 +259,89 @@ hasBoard(PG_FUNCTION_ARGS) {
   PG_FREE_IF_COPY(moveCount, 2);
   PG_RETURN_BOOL(result);
 }
+
+
+/*******************************************************************
+ * Function to get the first N half moves from PGN
+ * updated 12/03 16:00
+// **************************************************************/
+char* get_first_moves_internal(const char* PGN, int N) {
+    int N_all = N + N / 2 + N % 2;
+    // Variables to store the result
+    char* result = NULL;
+    int resultLength = 0;
+    // Counter for half moves
+    int halfMoves = 0;
+    // Pointer to the current position in the PGN
+    const char* currentPos = PGN;
+
+    while (*currentPos != '\0' && halfMoves < N_all) {
+        // Skip spaces and move to the next character
+        while (*currentPos == ' ') {
+            currentPos++;
+        }
+
+        // Check for the end of the PGN
+        if (*currentPos == '\0') {
+            break;
+        }
+
+        // Check for the start of a new move
+        if (isalnum(*currentPos)) {
+            // Increment the halfMoves counter
+            halfMoves++;
+
+            // Skip characters until the next space or the end of the PGN
+            while (isalnum(*currentPos) || *currentPos == '-') {
+                result = realloc(result, resultLength + 1);
+                if (result == NULL) {
+                    fprintf(stderr, "Memory allocation error\n");
+                    exit(EXIT_FAILURE);
+                }
+                result[resultLength++] = *currentPos;
+                currentPos++;
+            }
+            if(halfMoves%3 == 1){
+            // Add a dot after the move number
+            result = realloc(result, resultLength + 1);
+            if (result == NULL) {
+                fprintf(stderr, "Memory allocation error\n");
+                exit(EXIT_FAILURE);
+            }
+            result[resultLength++] = '.';
+            // result[resultLength++] = ' ';
+            }
+
+            // Add a space between moves if not the last move
+            if (halfMoves < N_all) {
+                result = realloc(result, resultLength + 1);
+                if (result == NULL) {
+                    fprintf(stderr, "Memory allocation error\n");
+                    exit(EXIT_FAILURE);
+                }
+                result[resultLength++] = ' ';
+            }
+        } else {
+            // Move to the next character
+            currentPos++;
+        }
+    }
+
+    // Null-terminate the result
+    result = realloc(result, resultLength + 1);
+    if (result == NULL) {
+        fprintf(stderr, "Memory allocation error\n");
+        exit(EXIT_FAILURE);
+    }
+    result[resultLength] = '\0';
+
+    return result;
+}
+
+PG_FUNCTION_INFO_V1(getFirstMoves);
+Datum getFirstMoves(PG_FUNCTION_ARGS) {
+  text *pgn_text = PG_GETARG_TEXT_P(0); 
+  char *pgn_str = text_to_cstring(pgn_text); 
+  int first_n = PG_GETARG_INT32(1);
+  PG_RETURN_CSTRING(get_first_moves_internal(pgn_str,first_n));
+}

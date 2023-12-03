@@ -48,6 +48,11 @@ CREATE FUNCTION hasBoard(chessgame, chessboard,int)
   AS 'MODULE_PATHNAME', 'hasBoard'
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
+CREATE OR REPLACE FUNCTION getFirstMoves(chessgame,int)
+  RETURNS cstring
+  AS 'MODULE_PATHNAME','getFirstMoves'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
 
 -- Create chessboard datatype
 CREATE TYPE chessboard (
