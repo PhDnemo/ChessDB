@@ -89,6 +89,74 @@ Datum san_out(PG_FUNCTION_ARGS) {
   PG_RETURN_CSTRING(san_str);
 
 }
+
+/*******************************************************************
+ * B Tree Index Related updated 12/03 12:00
+ * For SAN
+**************************************************************/
+PG_FUNCTION_INFO_V1(chessgame_cmp);
+Datum chessgame_cmp(PG_FUNCTION_ARGS) {
+    // Extract the two input SAN strings
+    text *san_text_1 = PG_GETARG_TEXT_PP(0);
+    text *san_text_2 = PG_GETARG_TEXT_PP(1);
+    // Convert the text to C strings
+    char *san_str_1 = text_to_cstring(san_text_1);
+    char *san_str_2 = text_to_cstring(san_text_2);
+    // Compare the two strings using strcmp
+    // If result < 0: the first key is less than the second key.
+    // If result = 0: the keys are equal.
+    // If result > 0: the first key is greater than the second key.
+    int result = strcmp(san_str_1, san_str_2);
+    // Free the allocated memory
+    pfree(san_str_1);
+    pfree(san_str_2);
+    // Return the comparison result
+    PG_RETURN_INT32(result);
+}
+
+
+PG_FUNCTION_INFO_V1(chessgame_eq);
+Datum chessgame_eq(PG_FUNCTION_ARGS) {
+    // Call chessgame_cmp and check for equality
+    int32 result = DatumGetInt32(DirectFunctionCall2(chessgame_cmp, PG_GETARG_DATUM(0), PG_GETARG_DATUM(1)));
+    PG_RETURN_BOOL(result == 0);
+}
+
+PG_FUNCTION_INFO_V1(chessgame_ne);
+Datum chessgame_ne(PG_FUNCTION_ARGS) {
+    // Call chessgame_cmp and check for inequality
+    int32 result = DatumGetInt32(DirectFunctionCall2(chessgame_cmp, PG_GETARG_DATUM(0), PG_GETARG_DATUM(1)));
+    PG_RETURN_BOOL(result != 0);
+}
+
+PG_FUNCTION_INFO_V1(chessgame_lt);
+Datum chessgame_lt(PG_FUNCTION_ARGS) {
+    // Call chessgame_cmp and check for less than
+    int32 result = DatumGetInt32(DirectFunctionCall2(chessgame_cmp, PG_GETARG_DATUM(0), PG_GETARG_DATUM(1)));
+    PG_RETURN_BOOL(result < 0);
+}
+
+PG_FUNCTION_INFO_V1(chessgame_le);
+Datum chessgame_le(PG_FUNCTION_ARGS) {
+    // Call chessgame_cmp and check for less than or equal to
+    int32 result = DatumGetInt32(DirectFunctionCall2(chessgame_cmp, PG_GETARG_DATUM(0), PG_GETARG_DATUM(1)));
+    PG_RETURN_BOOL(result <= 0);
+}
+
+PG_FUNCTION_INFO_V1(chessgame_gt);
+Datum chessgame_gt(PG_FUNCTION_ARGS) {
+    // Call chessgame_cmp and check for greater than
+    int32 result = DatumGetInt32(DirectFunctionCall2(chessgame_cmp, PG_GETARG_DATUM(0), PG_GETARG_DATUM(1)));
+    PG_RETURN_BOOL(result > 0);
+}
+
+PG_FUNCTION_INFO_V1(chessgame_ge);
+Datum chessgame_ge(PG_FUNCTION_ARGS) {
+    // Call chessgame_cmp and check for greater than or equal to
+    int32 result = DatumGetInt32(DirectFunctionCall2(chessgame_cmp, PG_GETARG_DATUM(0), PG_GETARG_DATUM(1)));
+    PG_RETURN_BOOL(result >= 0);
+}
+
 //Function to return the board state at a given half-move
 
 PG_FUNCTION_INFO_V1(getBoard);

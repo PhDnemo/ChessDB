@@ -50,3 +50,95 @@ CREATE TYPE chessgame (
   input          = san_in,
   output         = san_out
 );
+
+
+/******************************************************************************
+ * Operators for B-Tree
+ ******************************************************************************/
+
+CREATE FUNCTION chessgame_cmp(chessgame, chessgame)
+  RETURNS integer
+  AS 'MODULE_PATHNAME', 'chessgame_cmp'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION chessgame_eq(chessgame, chessgame)
+  RETURNS boolean
+  AS 'MODULE_PATHNAME', 'chessgame_eq'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION chessgame_ne(chessgame, chessgame)
+  RETURNS boolean
+  AS 'MODULE_PATHNAME', 'chessgame_ne'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION chessgame_lt(chessgame, chessgame)
+  RETURNS boolean
+  AS 'MODULE_PATHNAME', 'chessgame_lt'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION chessgame_le(chessgame, chessgame)
+  RETURNS boolean
+  AS 'MODULE_PATHNAME', 'chessgame_le'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION chessgame_gt(chessgame, chessgame)
+  RETURNS boolean
+  AS 'MODULE_PATHNAME', 'chessgame_lt'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION chessgame_ge(chessgame, chessgame)
+  RETURNS boolean
+  AS 'MODULE_PATHNAME', 'chessgame_le'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+-- Equal to
+CREATE OPERATOR = (
+  LEFTARG = chessgame, RIGHTARG = chessgame,
+  PROCEDURE = chessgame_eq,
+  COMMUTATOR = =, 
+  NEGATOR = <>
+);
+-- Not equal
+CREATE OPERATOR <> (
+  LEFTARG = chessgame, RIGHTARG = chessgame,
+  PROCEDURE = chessgame_ne,
+  COMMUTATOR = <>, 
+  NEGATOR = =
+);
+-- Less than
+CREATE OPERATOR < (
+  LEFTARG = chessgame, RIGHTARG = chessgame,
+  PROCEDURE = chessgame_lt,
+  COMMUTATOR = >,
+  NEGATOR = >=
+);
+-- Less than or equal
+CREATE OPERATOR <= (
+  LEFTARG = chessgame, RIGHTARG = chessgame,
+  PROCEDURE = chessgame_le,
+  COMMUTATOR = >=,
+  NEGATOR = >
+);
+-- Greater than
+CREATE OPERATOR > (
+  LEFTARG = chessgame, RIGHTARG = chessgame,
+  PROCEDURE = chessgame_gt,
+  COMMUTATOR = <,
+  NEGATOR = <=
+);
+--Greater than or equal
+CREATE OPERATOR >= (
+  LEFTARG = chessgame, RIGHTARG = chessgame,
+  PROCEDURE = chessgame_ge,
+  COMMUTATOR = <=,
+  NEGATOR = <
+);
+
+CREATE OPERATOR CLASS chessgame_btree
+  FOR TYPE chessgame USING btree AS
+  OPERATOR 1 < (chessgame, chessgame),
+  OPERATOR 2 <= (chessgame, chessgame),
+  OPERATOR 3 = (chessgame, chessgame),
+  OPERATOR 4 >= (chessgame, chessgame),
+  OPERATOR 5 > (chessgame, chessgame),
+  FUNCTION 1 chessgame_cmp(chessgame, chessgame);
