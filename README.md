@@ -56,8 +56,17 @@ select * from t1;
 
 select getBoard(t1.game,3) as chess_board from t1;
 
+CREATE TABLE t3(id int, game1 chessgame,game2 chessgame);
 
+insert into t2 VALUES (1, '1. e3 Nh6','1. e3 Nh6 2. Nc3 c5 3. Bb5 e6 4. g4 f5 5. g5 Qxg5');
 
+select hasOpening(game1,game2) from t2;    
+
+CREATE TABLE t4(id int, game chessgame, board chessboard);  
+
+insert into t4 values(1,'1. d3 d6 2. Nf3 Nf6 3. c3 d5 4. e4 e5','rnbqkb1r/ppp1pppp/3p1n2/8/8/3P1N2/PPP1PPPP/RNBQKB1R w KQkq - 2 3');
+
+select hasBoard(t4.game,t2.board,6) from t4;
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first
