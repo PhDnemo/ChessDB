@@ -33,6 +33,11 @@ CREATE OR REPLACE FUNCTION san_out(chessgame)
     AS 'MODULE_PATHNAME','san_out'
     LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
+CREATE OR REPLACE FUNCTION getBoard(chessgame,int)
+  RETURNS cstring
+  AS 'MODULE_PATHNAME','getBoard'
+  LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
 -- Create chessboard datatype
 CREATE TYPE chessboard (
   internallength = 1024,
