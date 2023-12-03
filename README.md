@@ -53,7 +53,8 @@ CREATE TABLE t1(id int, game chessgame);
 insert into t1 VALUES (1, '1. Nf3 Nf6 2. c4 g6 3. Nc3 Bg7');
 
 select * from t1;
-```
+
+select getBoard(t1.game,3) as chess_board from t1;
 
 
 
