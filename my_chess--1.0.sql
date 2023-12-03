@@ -44,7 +44,7 @@ CREATE FUNCTION hasOpening(chessgame, chessgame)
   RETURNS boolean
   AS 'MODULE_PATHNAME', 'hasOpening'
   LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
-  
+
 CREATE FUNCTION hasBoard(chessgame, chessboard,int)
   RETURNS boolean
   AS 'MODULE_PATHNAME', 'hasBoard'
@@ -113,14 +113,14 @@ CREATE FUNCTION chessgame_ge(chessgame, chessgame)
 CREATE OPERATOR = (
   LEFTARG = chessgame, RIGHTARG = chessgame,
   PROCEDURE = chessgame_eq,
-  COMMUTATOR = =, 
+  COMMUTATOR = =,
   NEGATOR = <>
 );
 -- Not equal
 CREATE OPERATOR <> (
   LEFTARG = chessgame, RIGHTARG = chessgame,
   PROCEDURE = chessgame_ne,
-  COMMUTATOR = <>, 
+  COMMUTATOR = <>,
   NEGATOR = =
 );
 -- Less than

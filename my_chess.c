@@ -17,14 +17,14 @@
 // PostgreSQL module magic
 PG_MODULE_MAGIC;
 
-#define MY_BOARD_START_STATE "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+//#define MY_BOARD_START_STATE "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 #define SAN_OUTPUT_SIZE 1024
 #define FEN_OUTPUT_SIZE 1024
 
-static void  putCharacter(char c)
-{
-  putchar(c);
-}
+// static void  putCharacter(char c)
+// {
+//   putchar(c);
+// }
 // #define SCL_FEN_MAX_LENGTH 1024
 
 /*******************************************************************
@@ -91,7 +91,7 @@ Datum san_out(PG_FUNCTION_ARGS) {
 }
 
 /*******************************************************************
- * B Tree Index Related updated 12/03 12:00
+ * B Tree Index Related
  * For SAN
 **************************************************************/
 PG_FUNCTION_INFO_V1(chessgame_cmp);
@@ -180,29 +180,31 @@ PG_FUNCTION_INFO_V1(getBoard);
 Datum getBoard(PG_FUNCTION_ARGS) {
 
     text *san_text = PG_GETARG_TEXT_P(0);
+
     uint16_t halfMoveCount = PG_GETARG_UINT16(1);
 
     char* result = getBoard_internal(san_text,halfMoveCount);
 
     PG_FREE_IF_COPY(san_text, 0);
+
     PG_FREE_IF_COPY(halfMoveCount, 1);
 
     return result;
 }
 //hasOpening_internal
-bool hasOpening_internal(char* san1, char* san2){
+bool hasOpening_internal(char* chessgame1, char* chessgame2){
 
-    char *san_str1 = text_to_cstring(san1);
-    char *san_str2 = text_to_cstring(san2);
-    SCL_Record chessgame1,chessgame2;
-    SCL_recordFromPGN(chessgame1,san_str1);
-    SCL_recordFromPGN(chessgame2,san_str2);
+    char *san_str1 = text_to_cstring(chessgame1);
+    char *san_str2 = text_to_cstring(chessgame2);
+    SCL_Record record1,record2;
+    SCL_recordFromPGN(record1,san_str1);
+    SCL_recordFromPGN(record2,san_str2);
 
     SCL_Record tempGame;
-    memcpy(&tempGame, chessgame2, sizeof(SCL_Record));
+    memcpy(&tempGame, record2, sizeof(SCL_Record));
 
-    uint16_t halfMoves1 = SCL_recordLength(chessgame1);
-    uint16_t halfMoves2 = SCL_recordLength(chessgame2);
+    uint16_t halfMoves1 = SCL_recordLength(record1);
+    uint16_t halfMoves2 = SCL_recordLength(record2);
 
     if (halfMoves1 > halfMoves2) {
         return false;
@@ -212,7 +214,7 @@ bool hasOpening_internal(char* san1, char* san2){
       SCL_recordRemoveLast(tempGame);
     }
 
-    return memcpy(&tempGame, &chessgame1, sizeof(SCL_Record));
+    return memcpy(&tempGame, &record1, sizeof(SCL_Record));
 }
 //Returns true if the first chess game starts with the exact same set of moves as the second chess game.
 PG_FUNCTION_INFO_V1(hasOpening);
@@ -226,15 +228,15 @@ hasOpening(PG_FUNCTION_ARGS) {
   PG_RETURN_BOOL(result);
 }
 
-bool hasBoard_internal(char* san, SCL_Board* targetBoard, int moveCount) {
+bool hasBoard_internal(char* chessgame, SCL_Board* targetBoard, int halfMoves) {
     char* result = NULL;
     char* fenstr = (char*)malloc(70 * sizeof(char));//allocation of size 70 char(FEN notation does not exceed 70 character)
     strcpy(fenstr,"");
 
     // Iterate through the first N half-moves
-    for (int i = 0; i < moveCount; ++i) {
+    for (int i = 0; i < halfMoves; ++i) {
 
-        result = getBoard_internal(san, i);
+        result = getBoard_internal(chessgame, i);
 
         SCL_boardToFEN(targetBoard, fenstr);
 
@@ -250,32 +252,39 @@ bool hasBoard_internal(char* san, SCL_Board* targetBoard, int moveCount) {
 PG_FUNCTION_INFO_V1(hasBoard);
 Datum
 hasBoard(PG_FUNCTION_ARGS) {
-  char* san  = PG_GETARG_POINTER(0);
+
+  char* chessgame  = PG_GETARG_POINTER(0);
+
   char* targetBoard = PG_GETARG_POINTER(1);
-  int moveCount = PG_GETARG_UINT16(2);
-  bool result = hasBoard_internal(san,targetBoard,moveCount);
-  PG_FREE_IF_COPY(san, 0);
+
+  int halfMoves = PG_GETARG_UINT16(2);
+
+  bool result = hasBoard_internal(chessgame,targetBoard,halfMoves);
+
+  PG_FREE_IF_COPY(chessgame, 0);
+
   PG_FREE_IF_COPY(targetBoard, 1);
-  PG_FREE_IF_COPY(moveCount, 2);
+
+  PG_FREE_IF_COPY(halfMoves, 2);
+
   PG_RETURN_BOOL(result);
 }
 
 
 /*******************************************************************
  * Function to get the first N half moves from PGN
- * updated 12/03 16:00
 // **************************************************************/
-char* get_first_moves_internal(const char* PGN, int N) {
-    int N_all = N + N / 2 + N % 2;
+char* get_first_moves_internal(const char* chessgame, int halfMoves) {
+    int N_all = halfMoves + halfMoves/ 2 + halfMoves % 2;
     // Variables to store the result
     char* result = NULL;
     int resultLength = 0;
     // Counter for half moves
-    int halfMoves = 0;
+    int halfMovesCounter = 0;
     // Pointer to the current position in the PGN
-    const char* currentPos = PGN;
+    const char* currentPos = chessgame;
 
-    while (*currentPos != '\0' && halfMoves < N_all) {
+    while (*currentPos != '\0' && halfMovesCounter < N_all) {
         // Skip spaces and move to the next character
         while (*currentPos == ' ') {
             currentPos++;
@@ -289,7 +298,7 @@ char* get_first_moves_internal(const char* PGN, int N) {
         // Check for the start of a new move
         if (isalnum(*currentPos)) {
             // Increment the halfMoves counter
-            halfMoves++;
+            halfMovesCounter++;
 
             // Skip characters until the next space or the end of the PGN
             while (isalnum(*currentPos) || *currentPos == '-') {
@@ -301,7 +310,7 @@ char* get_first_moves_internal(const char* PGN, int N) {
                 result[resultLength++] = *currentPos;
                 currentPos++;
             }
-            if(halfMoves%3 == 1){
+            if(halfMovesCounter%3 == 1){
             // Add a dot after the move number
             result = realloc(result, resultLength + 1);
             if (result == NULL) {
@@ -313,7 +322,7 @@ char* get_first_moves_internal(const char* PGN, int N) {
             }
 
             // Add a space between moves if not the last move
-            if (halfMoves < N_all) {
+            if (halfMovesCounter < N_all) {
                 result = realloc(result, resultLength + 1);
                 if (result == NULL) {
                     fprintf(stderr, "Memory allocation error\n");
@@ -339,9 +348,14 @@ char* get_first_moves_internal(const char* PGN, int N) {
 }
 
 PG_FUNCTION_INFO_V1(getFirstMoves);
+
 Datum getFirstMoves(PG_FUNCTION_ARGS) {
-  text *pgn_text = PG_GETARG_TEXT_P(0); 
-  char *pgn_str = text_to_cstring(pgn_text); 
-  int first_n = PG_GETARG_INT32(1);
-  PG_RETURN_CSTRING(get_first_moves_internal(pgn_str,first_n));
+
+  text *chessgame_text = PG_GETARG_TEXT_P(0);
+
+  char *chessgame_str = text_to_cstring(chessgame_text);
+
+  int halfMoves = PG_GETARG_INT32(1);
+
+  PG_RETURN_CSTRING(get_first_moves_internal(chessgame_str,halfMoves));
 }
