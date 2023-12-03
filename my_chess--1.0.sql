@@ -13,6 +13,8 @@
 --     LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 CREATE TYPE chessboard;
 CREATE TYPE chessgame;
+
+
 CREATE OR REPLACE FUNCTION SCL_board_in(cstring)
     RETURNS chessboard
     AS 'MODULE_PATHNAME','SCL_board_in'
@@ -151,7 +153,7 @@ CREATE OPERATOR >= (
 );
 
 CREATE OPERATOR CLASS chessgame_btree
-  FOR TYPE chessgame USING btree AS
+DEFAULT FOR TYPE chessgame USING btree AS
   OPERATOR 1 < (chessgame, chessgame),
   OPERATOR 2 <= (chessgame, chessgame),
   OPERATOR 3 = (chessgame, chessgame),
