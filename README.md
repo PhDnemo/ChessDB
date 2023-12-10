@@ -8,6 +8,9 @@ In this project, we create a PostgreSQL extension for storing and retrieving che
 - **Ziyong Zhang** - *3* - [Ziyong](https://github.com/Ziyong-Zhang)
 - **Jintao Ma** - *4* - [Jintao](https://github.com/woshimajintao)
 
+## Slides Available At
+43.134.231.220:8000/dbsa_formal.html
+
 ## Usage
 To run the extension, follow these steps:
 
