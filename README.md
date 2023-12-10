@@ -61,7 +61,7 @@ select getBoard(t1.game,3) as chess_board from t1;
 DROP TABLE IF EXISTS t2 ;
 CREATE TABLE t2(id int, game1 chessgame,game2 chessgame);
 
-insert into t2 VALUES (1, '1. e3 Nh6','1. e3 Nh6 2. Nc3 c5 3. Bb5 e6 4. g4 f5 5. g5 Qxg5');
+insert into t2 VALUES (1, '1. e3 Nh6 2. Nc3 c5 3. Bb5 e6 4. g4 f5 5. g5 Qxg5','1. e3 Nh6');
 
 select hasOpening(game1,game2) from t2;    
 
@@ -86,6 +86,8 @@ select hasBoard(t4.game,t4.board,6) from t4;
 
 
 -- has opening_ b-tree
+DROP TABLE IF EXISTS t5 ;
+
 CREATE TABLE t5(id int, game chessgame);
 
 insert into t5 VALUES (1, '1. e3 Nh6 2. Nc3 c5 3. Bb5 e6 4. g4 f5 5. g5 Qxg5');
