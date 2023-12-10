@@ -1,6 +1,5 @@
 # ChessDB
-This is the DBSA project.
-
+In this project, we create a PostgreSQL extension for storing and retrieving chess games.
 
 ## Contributors
 
@@ -9,35 +8,23 @@ This is the DBSA project.
 - **Ziyong Zhang** - *3* - [Ziyong](https://github.com/Ziyong-Zhang)
 - **Jintao Ma** - *4* - [Jintao](https://github.com/woshimajintao)
 
-## System Requirements
-
-This project requires the following system environment:
-- **Operating System**: 
-- **Postgres Version**: 
-
-## Environment Setup
-
-- **Install **: 
-
-
-
 ## Usage
 To run the extension, follow these steps:
 
 (1) Run the below in the terminal:
 
-```bash
+--bash
+
 PATH=/usr/local/pgsql/bin:$PATH
-cd “path_to_mychess”/complex/
-make clean
-make
-sudo make install
 
-psql -p <2345> chess_test
+cd “path_to_mychess”
 
-```
-(2) 
-``` sql
+make clean && make -B && make -B install
+
+psql -p PortNum chess_test
+
+(2) Single step test to test each datatype,function and index
+
 DROP EXTENSION IF EXISTS my_chess CASCADE;
 
 CREATE EXTENSION my_chess;
@@ -73,9 +60,6 @@ insert into t3 values(1,'1.f4 Nc6 2.f5 h5 3. b3 Nd4 4. b4 c6 5. g4 hxg4 6. d3 Nx
 
 select getFirstMoves(t3.game,5) from t3;
 
-
-
-
 DROP TABLE IF EXISTS t4 ;
 
 CREATE TABLE t4(id int, game chessgame, board chessboard);  
@@ -83,7 +67,6 @@ CREATE TABLE t4(id int, game chessgame, board chessboard);
 insert into t4 values(1,'1. d3 d6 2. Nf3 Nf6 3. c3 d5 4. e4 e5','rnbqkb1r/ppp1pppp/3p1n2/8/8/3P1N2/PPP1PPPP/RNBQKB1R w KQkq - 2 3');
 
 select hasBoard(t4.game,t4.board,6) from t4;
-
 
 -- has opening_ b-tree
 DROP TABLE IF EXISTS t5 ;
@@ -98,7 +81,9 @@ set enable_seqscan = off;
 
 explain(costs on) select hasOpening('1. e3 Nh6',game) from t5;
 
+(3) batch test--using test file test.sql to test all the datatypes and functions
 
+psql -p PortNum chess_test -f test.sql
 
 ## Contributing
 
