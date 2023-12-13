@@ -12,6 +12,7 @@ In this project, we create a PostgreSQL extension for storing and retrieving che
 43.134.231.220:8000/dbsa_formal.html
 
 ## Usage
+https://drive.google.com/file/d/1JQXLj4yv-vXf6IQaVd_MFEUVnJejv8-I/view?usp=sharing
 To run the extension, follow these steps:
 
 (1) Run the below in the terminal:
